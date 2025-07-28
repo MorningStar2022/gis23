@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gis23.backend.mapper.WebgisMapper">
+    <insert id="insertTrackLine" parameterType="com.gis23.backend.entity.TrackLine">
+        insert into tracks(taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,track_geom)
+        values(#{taxi_id},#{track_id},#{start_time},#{end_time},#{track_status},#{track_distance},#{track_speed},ST_GeomFromText(#{track_geom},4326))
+    </insert>
+    <select id="queryTrackLineByTime" parameterType="java.sql.Timestamp" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+    </select>
+    <select id="queryTrackLineByPolygonSPWithin" parameterType="string" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where ST_Within(ST_StartPoint(track_geom), ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryTrackLineByPolygonEPWithin" parameterType="string" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where ST_Within(ST_EndPoint(track_geom), ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryTrackLineByPolygonCrosses" parameterType="string" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where ST_Crosses(track_geom, ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryTrackLineByPolygonWithin" parameterType="string" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where ST_Within(track_geom, ST_GeomFromText(#{polygon}, 4326))
+    </select>
+
+    <select id="queryTrackLineByTimeAndPolygonSPWithin" parameterType="java.util.Map" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+        and ST_Within(ST_StartPoint(track_geom), ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryTrackLineByTimeAndPolygonEPWithin" parameterType="java.util.Map" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+        and ST_Within(ST_EndPoint(track_geom), ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryTrackLineByTimeAndPolygonWithin" parameterType="java.util.Map" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+        and ST_Within(track_geom, ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryTrackLineByTimeAndPolygonCrosses" parameterType="java.util.Map" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+        and ST_Crosses(track_geom, ST_GeomFromText(#{polygon}, 4326))
+    </select>
+    <select id="queryAllTrackLine" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+    </select>
+    <select id="queryTrackLineBySemanticWithin" parameterType="java.util.Map" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+        and ST_Within(ST_StartPoint(track_geom), ST_Buffer(ST_GeomFromText(#{point1}, 4326), 0.02))
+        and ST_Within(ST_EndPoint(track_geom), ST_Buffer(ST_GeomFromText(#{point2}, 4326), 0.02))
+    </select>
+    <select id="queryTrackLineBySemanticNearby" parameterType="java.util.Map" resultType="com.gis23.backend.entity.TrackLine">
+        select taxi_id,track_id,start_time,end_time,track_status,track_distance,track_speed,ST_AsText(track_geom) As track_geom
+        from tracks
+        where #{end_time}>end_time and start_time>#{start_time}
+        and ST_Crosses(track_geom, ST_Buffer(ST_GeomFromText(#{point}, 4326), 0.005))
+    </select>
+
+</mapper>
